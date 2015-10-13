@@ -1,0 +1,27 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '1.8.+'
+	compile group: 'org.apache.poi', name: 'poi-scratchpad', version: '3.13'
+	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
+
+	compile group: 'org.apache.lucene', name: 'lucene-core', version: '5.3.+'
+	compile group: 'org.apache.lucene', name: 'lucene-analyzers-common', version: '5.3.+'
+
+	compile group: 'javax.json', name: 'javax.json-api', version: '1.+'
+	compile group: 'org.glassfish', name: 'javax.json', version: '1.0.+'
+
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.22'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.22'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-processing', version: '2.22'
+	
+}
+
+eclipse.project {
+	natures 'org.eclipse.buildship.core.gradleprojectnature'
+}

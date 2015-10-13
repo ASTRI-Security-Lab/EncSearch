@@ -1,0 +1,11 @@
+.metadata
+*.un~
+.recommenders
+data
+EncSearch/.gradle
+EncSearch/bin
+EncSearch/build
+EncSearchServer/.gradle
+EncSearchServer/bin
+EncSearchServer/build
+old
