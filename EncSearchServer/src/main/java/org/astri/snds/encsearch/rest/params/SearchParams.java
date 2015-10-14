@@ -9,4 +9,6 @@ public class SearchParams {
 	
 	public List<String> keywords;
 
+	public SearchParams() { }
+	public SearchParams(List<String> keywords_) { keywords = keywords_; }
 }
