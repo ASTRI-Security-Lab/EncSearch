@@ -1,10 +1,8 @@
-POST `/index/add`
+PUT `/index`
 --------------------
 ```
 {
-	doc_ids: {
-		<document name>: int	 // each document name gets a numeric ID assigned
-	}
+	doc_ids: [String] // each document name gets a numeric ID assigned
 	keywords: {
 		<keyword>: {
 			<document id>: int   // number of occurences in given document

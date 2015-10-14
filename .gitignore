@@ -9,3 +9,9 @@ EncSearchServer/.gradle
 EncSearchServer/bin
 EncSearchServer/build
 old
+EncSearchServer/.settings
+EncSearchServer/.cache-main
+EncSearchServer/gradle/wrapper/gradle-wrapper.jar
+EncSearchServer/gradle/wrapper/gradle-wrapper.properties
+RemoteSystemsTempFiles
+Servers

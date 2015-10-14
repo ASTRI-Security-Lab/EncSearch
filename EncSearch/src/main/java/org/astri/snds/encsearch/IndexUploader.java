@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.client.ClientBuilder;
@@ -23,10 +24,9 @@ public class IndexUploader {
 
 	private JsonObject buildJsonRequest(HashMap<String, HashMap<String, Integer>> index) {
 		JsonObjectBuilder gen = Json.createObjectBuilder();
-		JsonObjectBuilder docIdsJson = Json.createObjectBuilder();
+		JsonArrayBuilder docIdsJson = Json.createArrayBuilder();
 
 		// documents are referenced by an ID to reduce JSON size
-		// docName -> doc ID
 		HashMap<String, Integer> docIds = new HashMap<String, Integer>();
 		int lastDocIx = 0;
 		for (HashMap<String, Integer> occ : index.values()) {
@@ -34,7 +34,7 @@ public class IndexUploader {
 				if (docIds.containsKey(doc)) continue;
 				
 				docIds.put(doc, lastDocIx);
-				docIdsJson.add(doc, lastDocIx);
+				docIdsJson.add(doc);
 				lastDocIx += 1;
 			}
 		}

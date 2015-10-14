@@ -34,5 +34,8 @@
         <servlet-name>javax.ws.rs.core.Application</servlet-name>
         <url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
+	<listener>
+		<listener-class>org.astri.snds.encsearch.rest.AppContext</listener-class>
+	</listener>
 	
 </web-app>
