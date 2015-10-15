@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.HashMap;
 
 import javax.crypto.Mac;
@@ -11,18 +13,16 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-public class KeywordExtractor {
+public class KeywordExtractor implements IKeywordExtractor {
 	
 	private Mac mac;
+	private Encoder urlEncoder = Base64.getUrlEncoder();
 	protected final String ENCODING = "UTF-8";
 	
-	// keyword -> (docName -> number of occurence of that word in that document)
+	// keyword -> (docName -> number of occurrence of that word in that document)
 	public HashMap<String, HashMap<String, Integer>> index = new HashMap<>();
 	
 	
@@ -33,11 +33,15 @@ public class KeywordExtractor {
 		mac.init(keyspec);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.astri.snds.encsearch.IKeywordExtractor#extractFromDocument(java.lang.String, java.lang.String)
+	 */
+	@Override
 	public void extractFromDocument(String docName, String contents) throws IOException {
 		
 		Analyzer analyzer = new CustomAnalyzer();
 		TokenStream ts = analyzer.tokenStream("body", contents);
-		OffsetAttribute offsetAtt = ts.addAttribute(OffsetAttribute.class);
+		//OffsetAttribute offsetAtt = ts.addAttribute(OffsetAttribute.class);
 
 		try {
 			ts.reset(); // Resets this stream to the beginning. (Required)
@@ -58,7 +62,7 @@ public class KeywordExtractor {
 		System.out.print(": ");
 		System.out.println(term);
 
-		String hmacB64 = Base64.encode(mac.doFinal(term.getBytes(ENCODING)));
+		String hmacB64 = urlEncoder.encodeToString(mac.doFinal(term.getBytes(ENCODING)));
 		System.out.println(hmacB64);
 		
 		// increment occurrences

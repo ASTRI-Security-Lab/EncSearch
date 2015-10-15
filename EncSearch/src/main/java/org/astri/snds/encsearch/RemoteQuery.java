@@ -11,11 +11,12 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 
-import org.astri.snds.encsearch.rest.ServiceJsonError;
+import org.astri.snds.encsearch.rest.JsonServiceReqException;
 
 public class RemoteQuery {
 	
@@ -26,7 +27,7 @@ public class RemoteQuery {
 	}
 
 	// returns list of docName
-	public List<String> searchKeywords(Collection<String> keywords) throws ServiceJsonError {
+	public List<String> searchKeywords(Collection<String> keywords) throws JsonServiceReqException {
 		WebTarget target = ClientBuilder.newClient().target(host).path("search");
 
 		JsonArrayBuilder kwJson = Json.createArrayBuilder();
@@ -37,14 +38,14 @@ public class RemoteQuery {
 				.add("keywords", kwJson.build())
 				.build();
 
-		JsonObject responseJson = target.request().post(Entity.json(requestJson), JsonObject.class);
-		if (responseJson.get("result").equals(true)) {
+		JsonObject responseJson = target.request().put(Entity.json(requestJson), JsonObject.class);
+		if (responseJson.get("result").equals(JsonValue.TRUE)) {
 			return responseJson.getJsonArray("documents").stream()
 				.map((i) -> ((JsonString)i).getString())
 				.collect(Collectors.toList());
 			
 		} else {
-			throw new ServiceJsonError(responseJson);
+			throw new JsonServiceReqException(responseJson);
 		}
 	}
 

@@ -17,9 +17,9 @@ import org.apache.xmlbeans.XmlException;
 public class DocManager implements Consumer<Path> {
 	
 	private Path homePath;
-	private KeywordExtractor kwExtractor;
+	private IKeywordExtractor kwExtractor;
 	
-	public DocManager(Path folder, KeywordExtractor kwExtractor_) {
+	public DocManager(Path folder, IKeywordExtractor kwExtractor_) {
 		homePath = folder;
 		kwExtractor = kwExtractor_;
 	}

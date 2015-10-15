@@ -9,11 +9,12 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 
-import org.astri.snds.encsearch.rest.ServiceJsonError;
+import org.astri.snds.encsearch.rest.JsonServiceReqException;
 
 public class IndexUploader {
 	private URI host;
@@ -53,17 +54,17 @@ public class IndexUploader {
 		return gen.build();
 	}
 	
-	public void upload(HashMap<String, HashMap<String, Integer>> index) throws ServiceJsonError {
+	public void upload(HashMap<String, HashMap<String, Integer>> index) throws JsonServiceReqException {
 		JsonObject requestJson = buildJsonRequest(index);
 		
-		WebTarget target = ClientBuilder.newClient().target(host).path("index/add");
-		JsonObject responseJson = target.request().post(Entity.json(requestJson), JsonObject.class);
+		WebTarget target = ClientBuilder.newClient().target(host).path("index");
+		JsonObject responseJson = target.request().put(Entity.json(requestJson), JsonObject.class);
 
-		if (responseJson.get("result").equals(true)) {
+		if (responseJson.get("result").equals(JsonValue.TRUE)) {
 			return;  // okey
 		
 		} else {
-			throw new ServiceJsonError(responseJson);
+			throw new JsonServiceReqException(responseJson);
 		}
 	}
 }

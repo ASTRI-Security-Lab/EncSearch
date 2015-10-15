@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'scala'
 apply plugin: 'eclipse'
 
 repositories {
@@ -20,6 +21,10 @@ dependencies {
 	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.22'
 	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-processing', version: '2.22'
 	
+    testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.+'
+
+    // for cleaning the DB for tests
+	testCompile group: 'org.postgresql', name:'postgresql', version: '9.4-1204-jdbc4'
 }
 
 eclipse.project {

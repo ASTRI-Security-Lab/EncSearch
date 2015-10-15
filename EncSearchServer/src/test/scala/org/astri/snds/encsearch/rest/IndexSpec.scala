@@ -10,7 +10,7 @@ import org.astri.snds.encsearch.rest.params.IndexAddParams.OccurenceParams
 
 import scala.collection.JavaConversions.{mapAsScalaMap, collectionAsScalaIterable, seqAsJavaList}
 
-class IndexSpec extends FlatSpec {
+class IndexSpec extends FlatSpec with Matchers {
   
   object Fixture {
       val api = new IndexResource()
@@ -96,13 +96,13 @@ class IndexSpec extends FlatSpec {
     val f = fixture
     prepareData(f.api)
     val res = f.trySearch(List("claws"))
-    assert(res == List("birds.txt"))
+    res should equal( List("claws") )
   }
   
   "The index" should "search multiple keywords" in {
     val f = fixture
     prepareData(f.api)
     val res = f.trySearch(List("claws", "eyes"))
-    assert(res == List("birds.txt"))
+    res should equal( List("birds.txt") )
   }
 }

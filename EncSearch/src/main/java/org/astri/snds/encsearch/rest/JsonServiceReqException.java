@@ -2,15 +2,15 @@ package org.astri.snds.encsearch.rest;
 
 import javax.json.JsonObject;
 
-public class ServiceJsonError extends Exception {
+public class JsonServiceReqException extends Exception {
 	private String errKind;
 	
-	public ServiceJsonError(JsonObject response) {
+	public JsonServiceReqException(JsonObject response) {
 		assert response.get("result").equals("error");
 		errKind = response.getString("err_kind");
 	}
 	
-	public ServiceJsonError(String errKind_) {
+	public JsonServiceReqException(String errKind_) {
 		errKind = errKind_;
 	}
 
