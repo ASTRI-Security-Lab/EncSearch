@@ -32,3 +32,24 @@ dependencies {
 eclipse.project {
 	natures 'org.eclipse.buildship.core.gradleprojectnature'
 }
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Searchable Encryption Client',  
+        	'Implementation-Version': '0.1a',
+        	'Main-Class': 'org.astri.snds.encsearch.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task depSize {
+	configurations.compile.files.each { file ->
+		print file.size() / 1000
+		print " kB \t"
+		println file
+	}
+	
+}

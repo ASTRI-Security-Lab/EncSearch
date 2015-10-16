@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -44,7 +45,7 @@ public class FileCrypto implements Destroyable {
 	private static final String CR_ALG_AES = "AES/CBC/PKCS5Padding";
 	public static final String EXT_HEADER = ".ench";
 	public static final String EXT_DATA = ".encd";
-	private final int CR_ITERATIONS = 32000;   // TODO: more?
+	private final int CR_ITERATIONS = 128 * 1000;   // TODO: more?
 	private final int CR_KEY_LENGTH = 16;
 	private final int CR_RAWKEY_LENGTH = CR_KEY_LENGTH * 8 * 4;  // encrypt, mac, name, keywords
 	private final int CR_SALT_LENGTH = 20;
@@ -57,11 +58,11 @@ public class FileCrypto implements Destroyable {
 	private Path outDir;
 
 	// TODO: having password in a String is not so nice
-	public FileCrypto(String password, Path outDir_) {
+	public FileCrypto(byte[] password, Path outDir_) {
 		this(password, null, outDir_);
 	}
 	
-	public FileCrypto(String password, byte[] salt_, Path outDir_) {
+	public FileCrypto(byte[] password, byte[] salt_, Path outDir_) {
 		// this will need to be cleaned
 		byte[] key = null;
 		byte[] encKeyBytes = new byte[CR_KEY_LENGTH];
@@ -83,8 +84,10 @@ public class FileCrypto implements Destroyable {
 				salt = salt_;
 			}
 
-
-			PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, CR_ITERATIONS, CR_RAWKEY_LENGTH);
+			char[] passwordCh = new char[password.length];
+			for (int i = 0; i < password.length; i++) { passwordCh[i] = (char) password[i]; }
+			PBEKeySpec keySpec = new PBEKeySpec(passwordCh, salt, CR_ITERATIONS, CR_RAWKEY_LENGTH);
+			Arrays.fill(passwordCh, '-');
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 			key = keyFactory.generateSecret(keySpec).getEncoded();
 			kwKey = new byte[CR_KEY_LENGTH];
@@ -108,7 +111,7 @@ public class FileCrypto implements Destroyable {
 		}
 	}
 	
-	public void onFileFound(Path file) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, JAXBException, IllegalBlockSizeException, BadPaddingException {
+	public String onFileFound(Path file) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, JAXBException, IllegalBlockSizeException, BadPaddingException {
 		// encrypt file name
 		CryptoHeader header = prepareHeader();
 		String encryptedName = encryptName(file, header);
@@ -116,7 +119,7 @@ public class FileCrypto implements Destroyable {
 		Path headerPath = getEncHeaderPath(encryptedName);
 		
 		// TODO: some way to know if file has already been encrypted or not
-		if (dataPath.toFile().exists() && headerPath.toFile().exists()) return;
+		if (dataPath.toFile().exists() && headerPath.toFile().exists()) return file.toString();
 
 		// if not, encrypt
 		encryptFile(header, file, dataPath);
@@ -129,6 +132,7 @@ public class FileCrypto implements Destroyable {
         marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
 		marshaller.marshal(header, headerOut);
 		if (headerOut != null) headerOut.close();
+		return encryptedName;
 	}
 
 	private CryptoHeader prepareHeader() {
@@ -139,12 +143,14 @@ public class FileCrypto implements Destroyable {
 	}
 	
 	private String encryptName(Path file, CryptoHeader header) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+		/*
 		System.out.println(String.format("encrypting name [%s] encKey [%s]",
 				file.toString(),
 				Base64Adapter.enc.encodeToString(encKey.getEncoded()) ));
 		System.out.println(String.format("  hmacKey [%s] iv [%s]",
 				Base64Adapter.enc.encodeToString(hmacKey.getEncoded()),
 				Base64Adapter.enc.encodeToString(header.iv) ));
+		*/
 
 		// encrypt file name, using same IV but a different key
 		Cipher cipher = Cipher.getInstance(CR_ALG_AES);
@@ -159,8 +165,7 @@ public class FileCrypto implements Destroyable {
 		header.name_hmac = hmac.doFinal(crBytes);
 
 		String result = Base64Adapter.enc.encodeToString(crBytes);
-		System.out.println(String.format("  result [%s]",
-				result));
+		//System.out.println(String.format("  result [%s]", result));
 		return result;
 	}
 
@@ -217,6 +222,7 @@ public class FileCrypto implements Destroyable {
 		hmac.init(hmacKey);
 		
 		String safeOutFilename = decryptName(filenameOnly, header).replaceAll("\\.\\.\\/", "");
+		if (safeOutFilename.startsWith("/")) safeOutFilename = safeOutFilename.substring(1);
 		Path outPath = outDir.resolve(safeOutFilename);
 		outPath.toFile().getParentFile().mkdirs();
 

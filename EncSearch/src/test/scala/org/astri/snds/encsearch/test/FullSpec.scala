@@ -49,13 +49,13 @@ class FullSpec extends FlatSpec with Matchers {
     val encrPath = TCommon.getData("FullSpec/encrypted")
     
     // run encryption
-    val fileCrypt = new FileCrypto("abcd", encrPath)
+    val fileCrypt = new FileCrypto(Array('a', 'b', 'c'), encrPath)
     val mgr = new DocManager(TCommon.getData("FullSpec"), null, fileCrypt);
     
     mgr.search()
     
     // run decryption
-    val fileDecrypt = new FileCrypto("abcd", fileCrypt.getSalt, TCommon.getData("FullSpec/decrypted"))
+    val fileDecrypt = new FileCrypto(Array('a', 'b', 'c'), fileCrypt.getSalt, TCommon.getData("FullSpec/decrypted"))
     Files.walk(encrPath).forEach(new Consumer[Path] {
       def accept(p:Path) = {
         try {

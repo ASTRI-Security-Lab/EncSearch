@@ -38,51 +38,53 @@ public class DocManager implements Consumer<Path> {
 
 		String ext = t.toString().substring(ps).toLowerCase();
 		try {
+			String encName = t.toString();
+			if (encrypter != null) {
+				if (!(ext.equals(FileCrypto.EXT_DATA) || ext.equals(FileCrypto.EXT_HEADER))) {
+					encName = encrypter.onFileFound(t);
+				}
+			}
+
 			if (kwExtractor != null) {
 				if (ext.equals(".doc")) {
-					acceptMsWord(t);
+					acceptMsWord(t, encName);
 				} else if (ext.equals(".docx")) {
-					acceptMsWord(t);
+					acceptMsWord(t, encName);
 				} else if (ext.equals(".pdf")) {
-					acceptPdf(t);
+					acceptPdf(t, encName);
 				} else if (ext.equals(".txt")) {
-					acceptPlain(t, new String(Files.readAllBytes(t)));
+					acceptPlain(encName, new String(Files.readAllBytes(t)));
 				}
 			}
 			
-			if (encrypter != null) {
-				if (!(ext.equals(FileCrypto.EXT_DATA) || ext.equals(FileCrypto.EXT_HEADER))) {
-					encrypter.onFileFound(t);
-				}
-			}
 		} catch (Exception e) {
 			// TODO: probably more like skipping these files
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void acceptPlain(Path file, String contents) throws IOException {
-		kwExtractor.extractFromDocument(file.toString(), contents);
+	private void acceptPlain(String encName, String contents) throws IOException {
+		kwExtractor.extractFromDocument(encName, contents);
 	}
 
-	private void acceptPdf(Path t) throws IOException {
+	private void acceptPdf(Path t, String encName) throws IOException {
 		PDFTextStripper stripper = new PDFTextStripper();
 		PDDocument document = PDDocument.load(t.toFile());
 		try {
 			String result = stripper.getText(document); 
-			acceptPlain(t, result);
+			acceptPlain(encName, result);
 		} finally {
 			document.close();
 		}
 	}
 
-	private void acceptMsWord(Path t) throws IOException, InvalidFormatException, OpenXML4JException, XmlException {
+	private void acceptMsWord(Path t, String encName) throws IOException, InvalidFormatException, OpenXML4JException, XmlException {
 		InputStream inputStream = Files.newInputStream(t);
 		POITextExtractor extractor = null;
 		try {
 			extractor = ExtractorFactory.createExtractor(t.toFile());
 			String result = extractor.getText();
-			acceptPlain(t, result);
+			acceptPlain(encName, result);
 		} finally {
 			inputStream.close();
 			if (extractor != null) extractor.close();
