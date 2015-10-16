@@ -26,25 +26,25 @@ class ExtractSpec extends FlatSpec with Matchers {
   }
 
   "Document extractor" should "extract TXT correctly" in {
-    val doc = new DocManager(Paths.get("."), ex)
+    val doc = new DocManager(Paths.get("."), ex, null)
     doc.accept(TCommon.getData("ExtractSpec.1.txt"))
     ex.received should equal("paws PAWS\nclaws Claw\n")
   }
   
   "Document extractor" should "extract PDF correctly" in {
-    val doc = new DocManager(TCommon.getData(""), ex)
+    val doc = new DocManager(TCommon.getData(""), ex, null)
     doc.accept(TCommon.getData("ExtractSpec.2.pdf"))
     ex.received.replaceAll("\n", "") should equal("Goodbye cruel WorldI dont want to live on this planet anymore")
   }
 
   "Document extractor" should "extract DOC correctly" in {
-    val doc = new DocManager(TCommon.getData(""), ex)
+    val doc = new DocManager(TCommon.getData(""), ex, null)
     doc.accept(TCommon.getData("ExtractSpec.3.doc"))
     ex.received.replaceAll("\n", "") should equal("Trait FlatSpec is so named because your specification text")
   }
 
   "Document extractor" should "extract DOCX correctly" in {
-    val doc = new DocManager(TCommon.getData(""), ex)
+    val doc = new DocManager(TCommon.getData(""), ex, null)
     doc.accept(TCommon.getData("ExtractSpec.4.docx"))
     ex.received.replaceAll("\n", "") should equal("Trait FlatSpec is so named because your specification text")
   }

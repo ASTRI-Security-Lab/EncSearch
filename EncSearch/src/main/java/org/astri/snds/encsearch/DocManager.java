@@ -18,10 +18,12 @@ public class DocManager implements Consumer<Path> {
 	
 	private Path homePath;
 	private IKeywordExtractor kwExtractor;
+	private FileCrypto encrypter;
 	
-	public DocManager(Path folder, IKeywordExtractor kwExtractor_) {
+	public DocManager(Path folder, IKeywordExtractor kwExtractor_, FileCrypto encrypter_) {
 		homePath = folder;
 		kwExtractor = kwExtractor_;
+		encrypter = encrypter_;
 	}
 	
 	public void search() throws IOException {
@@ -36,14 +38,22 @@ public class DocManager implements Consumer<Path> {
 
 		String ext = t.toString().substring(ps).toLowerCase();
 		try {
-			if (ext.equals(".doc")) {
-				acceptMsWord(t);
-			} else if (ext.equals(".docx")) {
-				acceptMsWord(t);
-			} else if (ext.equals(".pdf")) {
-				acceptPdf(t);
-			} else if (ext.equals(".txt")) {
-				acceptPlain(t, new String(Files.readAllBytes(t)));
+			if (kwExtractor != null) {
+				if (ext.equals(".doc")) {
+					acceptMsWord(t);
+				} else if (ext.equals(".docx")) {
+					acceptMsWord(t);
+				} else if (ext.equals(".pdf")) {
+					acceptPdf(t);
+				} else if (ext.equals(".txt")) {
+					acceptPlain(t, new String(Files.readAllBytes(t)));
+				}
+			}
+			
+			if (encrypter != null) {
+				if (!(ext.equals(FileCrypto.EXT_DATA) || ext.equals(FileCrypto.EXT_HEADER))) {
+					encrypter.onFileFound(t);
+				}
 			}
 		} catch (Exception e) {
 			// TODO: probably more like skipping these files

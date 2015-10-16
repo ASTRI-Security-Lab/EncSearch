@@ -1,7 +1,8 @@
 package org.astri.snds.encsearch.test
 
 import java.net.URL
-import java.nio.file.Paths
+import java.nio.file.{Paths, Files, Path}
+import java.util.function.Consumer
 
 import org.scalatest._
 import scala.collection.JavaConversions.{mapAsScalaMap, collectionAsScalaIterable}
@@ -31,7 +32,7 @@ class FullSpec extends FlatSpec with Matchers {
       
     // build index
     val kwExtractor = new KeywordExtractor(rawkey)
-    val mgr = new DocManager(TCommon.getData("FullSpec"), kwExtractor)
+    val mgr = new DocManager(TCommon.getData("FullSpec"), kwExtractor, null)
     mgr.search()
     
     val up = new IndexUploader(server)
@@ -42,6 +43,32 @@ class FullSpec extends FlatSpec with Matchers {
     tryQuery("scary") should contain only ("crocodiles.txt")
     tryQuery("cute") should have size(0)
     tryQuery("whiskers") should contain only ("mouse.txt")
+  }
+  
+  "File encryption" should "just work" in {
+    val encrPath = TCommon.getData("FullSpec/encrypted")
+    
+    // run encryption
+    val fileCrypt = new FileCrypto("abcd", encrPath)
+    val mgr = new DocManager(TCommon.getData("FullSpec"), null, fileCrypt);
+    
+    mgr.search()
+    
+    // run decryption
+    val fileDecrypt = new FileCrypto("abcd", fileCrypt.getSalt, TCommon.getData("FullSpec/decrypted"))
+    Files.walk(encrPath).forEach(new Consumer[Path] {
+      def accept(p:Path) = {
+        try {
+          fileDecrypt.decryptFile(p)
+        } catch  {
+          case e:Exception => e.printStackTrace()
+        }
+      }
+    })
+    
+    // now check
+    val names = List("crocodiles.txt", "mouse.txt")
+
   }
   
 }

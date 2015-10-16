@@ -15,3 +15,6 @@ EncSearchServer/gradle/wrapper/gradle-wrapper.jar
 EncSearchServer/gradle/wrapper/gradle-wrapper.properties
 RemoteSystemsTempFiles
 Servers
+EncSearch/.cache-main
+EncSearch/.cache-tests
+.cache-tests

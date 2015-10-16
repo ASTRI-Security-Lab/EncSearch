@@ -21,6 +21,8 @@ dependencies {
 	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.22'
 	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-processing', version: '2.22'
 	
+	compile group: 'com.google.guava', name: 'guava', version: '19.0-rc2'
+	
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.+'
 
     // for cleaning the DB for tests

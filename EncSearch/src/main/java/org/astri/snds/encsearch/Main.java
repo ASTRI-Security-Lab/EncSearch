@@ -7,23 +7,25 @@ public class Main {
 	
 	public static void main(String[] args) {
 		try {
-			byte[] rawkey = new byte[] {11, 22, 33, 44, 55, 66, 77, 88, 99, 0};
 			URL searchHost = new URL("http://localhost:8080/EncSearchServer/rest");
 
 			// build index
-			KeywordExtractor kwExtractor = new KeywordExtractor(rawkey);
-			DocManager mgr = new DocManager(Paths.get("../data"), kwExtractor);
+			FileCrypto crypt = new FileCrypto("abcd", Paths.get("../data/encrypted"));
+			KeywordExtractor kwExtractor = new KeywordExtractor(crypt.getKwKey());
+			DocManager mgr = new DocManager(Paths.get("../data"), kwExtractor, crypt);
 			mgr.search();
 			
 			IndexUploader up = new IndexUploader(searchHost);
 			up.upload(kwExtractor.index);
 			
 			// query
-			KeywordExtractor queryEx = new KeywordExtractor(rawkey);
+			KeywordExtractor queryEx = new KeywordExtractor(crypt.getKwKey());
 			queryEx.extractFromDocument("query", "bank China");
 			
 			RemoteQuery query = new RemoteQuery(searchHost);
 			query.searchKeywords(queryEx.index.keySet()).forEach(i -> System.out.println(i));
+			
+			crypt.destroy();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
