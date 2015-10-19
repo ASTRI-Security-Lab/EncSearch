@@ -57,7 +57,6 @@ public class FileCrypto implements Destroyable {
 	private JAXBContext jaxb;
 	private Path outDir;
 
-	// TODO: having password in a String is not so nice
 	public FileCrypto(byte[] password, Path outDir_) {
 		this(password, null, outDir_);
 	}
@@ -127,11 +126,14 @@ public class FileCrypto implements Destroyable {
 		// and save header
 		OutputStream headerOut = null;
 		headerOut = new FileOutputStream(headerPath.toFile());
-		Marshaller marshaller = jaxb.createMarshaller();
-        marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
-        marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
-		marshaller.marshal(header, headerOut);
-		if (headerOut != null) headerOut.close();
+		try {
+			Marshaller marshaller = jaxb.createMarshaller();
+			marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
+			marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
+			marshaller.marshal(header, headerOut);
+		} finally {
+			if (headerOut != null) headerOut.close();
+		}
 		return encryptedName;
 	}
 
@@ -302,11 +304,12 @@ public class FileCrypto implements Destroyable {
 		for (int i = 0; i < key.length; i++) key[i] = 0;
 	}
 	
-	// TODO: is not actually called anywhere
 	public void destroy() throws DestroyFailedException {
+		/*  It would be nice if JDK8 actually implemented these methods
 		if (encKey != null) encKey.destroy();
 		if (hmacKey != null) hmacKey.destroy();
 		if (nameKey != null) nameKey.destroy();
+		*/
 		destroyBytes(kwKey);
 	}
 

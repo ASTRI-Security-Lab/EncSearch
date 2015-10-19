@@ -10,7 +10,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.crypto.BadPaddingException;
 import javax.xml.bind.JAXBException;
 
 public class Main {
@@ -68,6 +67,7 @@ public class Main {
 			RemoteQuery query = new RemoteQuery(cfg.search_server);
 			List<String> docs = query.searchKeywords(queryEx.index.keySet());
 			
+			System.out.println("Found documents:");
 			docs.forEach(i -> System.out.println(i));
 			
 			// also decrypt each

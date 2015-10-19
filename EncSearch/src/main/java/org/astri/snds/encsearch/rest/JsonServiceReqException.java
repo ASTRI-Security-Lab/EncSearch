@@ -3,6 +3,8 @@ package org.astri.snds.encsearch.rest;
 import javax.json.JsonObject;
 
 public class JsonServiceReqException extends Exception {
+	
+	private static final long serialVersionUID = -7500122075905718136L;
 	private String errKind;
 	
 	public JsonServiceReqException(JsonObject response) {

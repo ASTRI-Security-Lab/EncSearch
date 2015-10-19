@@ -58,12 +58,13 @@ public class KeywordExtractor implements IKeywordExtractor {
 	}
 	
 	public void addKeyword(String docName, String term) throws IllegalStateException, UnsupportedEncodingException {
+		/*
 		System.out.print(docName);
 		System.out.print(": ");
 		System.out.println(term);
+		*/
 
 		String hmacB64 = urlEncoder.encodeToString(mac.doFinal(term.getBytes(ENCODING)));
-		System.out.println(hmacB64);
 		
 		// increment occurrences
 		HashMap<String, Integer> docs = null;
