@@ -33,15 +33,25 @@ eclipse.project {
 	natures 'org.eclipse.buildship.core.gradleprojectnature'
 }
 
+def source_path = 'org/astri/snds/encsearch'
+
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
 	manifest {
-        attributes 'Implementation-Title': 'Searchable Encryption Client',  
+        attributes('Implementation-Title': 'Searchable Encryption Client',  
         	'Implementation-Version': '0.1a',
-        	'Main-Class': 'org.astri.snds.encsearch.Main'
+        	'Main-Class': 'org.astri.snds.encsearch.Main')
     }
     baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } } {
+		exclude "META-INF/*.SF"
+		exclude "META-INF/*.DSA"
+		exclude "META-INF/*.RSA"
+	}
+	// TODO: add this to thin jar as well
+	from('src/main/java/' + source_path) {
+		include 'jaxb.properties' into (source_path)
+	}
     with jar
 }
 

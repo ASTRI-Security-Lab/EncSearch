@@ -102,7 +102,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			if (args.length < 1) {
-				System.out.println("init | add | q");
+				System.out.println("init | add | q");
 				return;
 			}
 			String op = args[0];
