@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.xml.bind.JAXBException;
 
@@ -45,7 +46,7 @@ public class Main {
 			DocManager mgr = new DocManager(Paths.get(cfg.docs_path), kwExtractor, crypt);
 			mgr.search();
 
-			IndexUploader up = new IndexUploader(cfg.search_server);
+			IndexUploader up = new IndexUploader(cfg.search_server, cfg.username, cfg.salt);
 			up.upload(kwExtractor.index);
 		} finally {
 			FileCrypto.destroyBytes(pwd);
@@ -94,11 +95,23 @@ public class Main {
 		c.encrypted_path = Paths.get(USER_HOME, ".org.astri.snds.encsearch", "encrypted").toString();
 		c.decrypt_path = Paths.get(USER_HOME, ".org.astri.snds.encsearch", "decrypted").toString();
 		c.search_server = new URL("http://localhost:8080/EncSearchServer/rest");
+		c.username = genRandomWord(rnd);
 		
 		CONFIG_FILE.toFile().getParentFile().mkdirs();
 		c.write(CONFIG_FILE.toString());
 	}
 	
+	private static String genRandomWord(Random rnd) {
+		final String[] groups = new String[] { "bflmpsvz", "aeiouy" };
+		
+		StringBuilder res = new StringBuilder(8);
+		for (int i = 0; i < res.capacity(); i++) {
+			String g = groups[i % 2];
+			res.append(g.charAt(rnd.nextInt(g.length())));
+		}
+		return res.toString();
+	}
+
 	public static void main(String[] args) {
 		try {
 			if (args.length < 1) {

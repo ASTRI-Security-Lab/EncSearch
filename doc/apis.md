@@ -2,6 +2,8 @@ PUT `/index`
 --------------------
 ```
 {
+	username: string  // user identifier TODO: add auth to prevent random people from adding to index
+	salt: string      // the salt this user is using for his password. The server stores it.
 	doc_ids: [String] // each document name gets a numeric ID assigned
 	keywords: {
 		<keyword>: {
@@ -27,12 +29,3 @@ response:
 	documents: [String]   // list of document names that matched
 }
 ```
-
-Database schema:
--------------------
-	TABLE keywords
-		id, name
-	TABLE documents
-		id, name
-	TABLE occurs
-		kw_id, doc_id, count

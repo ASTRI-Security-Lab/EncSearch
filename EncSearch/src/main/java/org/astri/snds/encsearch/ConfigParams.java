@@ -24,6 +24,7 @@ public class ConfigParams {
 	public String encrypted_path;
 	public String decrypt_path;
 	public List<String> done;
+	public String username;
 	
 	
 	@XmlJavaTypeAdapter(Base64Adapter.class)

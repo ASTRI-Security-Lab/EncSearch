@@ -8,26 +8,21 @@ import javax.json.{Json, JsonObject, JsonValue, JsonNumber}
 
 import scala.collection.JavaConversions.{mapAsScalaMap, collectionAsScalaIterable}
 
-import org.astri.snds.encsearch.rest.params.{TestParams, IndexAddParams}
+import org.astri.snds.encsearch.rest.params.{IndexAddParams}
 
 
 @Path("/index")
 class IndexResource {
   
-  @GET
-  def main():String = {
-    "Hello"
+  
+  def insertUser(username:String, salt:String) {
+    val conn = AppContext.dbConn
+    val insertStatement = conn.prepareStatement("INSERT INTO users (username, salt) VALUES (?, ?)")
+    insertStatement.setString(1, username)
+    insertStatement.setString(2, salt)
+    insertStatement.execute()
   }
   
-  @POST
-  @Path("test")  // TODO: maybe should not use verb in REST url
-	@Produces(Array(MediaType.APPLICATION_JSON))
-	@Consumes(Array(MediaType.APPLICATION_JSON))
-	def test(req:TestParams):String = {
-    req.toString()
-  }
-  
-
   @PUT
 	@Produces(Array(MediaType.APPLICATION_JSON))
 	@Consumes(Array(MediaType.APPLICATION_JSON))
@@ -39,19 +34,26 @@ class IndexResource {
       VALUES (?, ?, ?)
     """)
     
-    req.keywords.foreach{kw => 
-      kw.value.foreach{occur =>
-        insertStatement.setString(1, kw.keyword)
-        insertStatement.setString(2, req.doc_ids.get(Integer parseInt occur.doc_id))
-        insertStatement.setInt(3, occur.count)
-        insertStatement.addBatch()
+    if (req.keywords != null) req.keywords.foreach{kw => 
+        kw.value.foreach{occur =>
+          insertStatement.setString(1, kw.keyword)
+          insertStatement.setString(2, req.doc_ids.get(Integer parseInt occur.doc_id))
+          insertStatement.setInt(3, occur.count)
+          insertStatement.addBatch()
+        }
       }
-    }
     insertStatement.executeBatch()
     
-    Json.createObjectBuilder.
-      add("result", true).
-      build()
+    val response = Json.createObjectBuilder.
+      add("result", true);
+    
+    // add or check user salt
+    UserResource.userExists(req.username) match {
+      case None => insertUser(req.username, req.salt)
+      case Some(existingSalt) => if (existingSalt != req.salt) response.add("warning", "salt_mismatch")
+    }
+    
+    response.build()
   }
   
 }

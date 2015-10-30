@@ -37,6 +37,9 @@ public class IndexAddParams {
 	@XmlPath("keywords")
 	@XmlVariableNode("keyword")
 	public List<KeywordParams> keywords;
+	
+	public String salt;
+	public String username;
 
 	public IndexAddParams() {}
 }

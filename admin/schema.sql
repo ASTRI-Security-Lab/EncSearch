@@ -30,3 +30,12 @@ ALTER TABLE ONLY occurs
 	ADD CONSTRAINT occurs_pkey PRIMARY KEY (keyword, doc_name);
 
 CREATE INDEX ON occurs (keyword);
+
+
+CREATE TABLE users (
+	username character varying NOT NULL,
+	salt character varying NOT NULL
+);
+
+ALTER TABLE users
+	ADD CONSTRAINT username_pkey PRIMARY KEY (username);

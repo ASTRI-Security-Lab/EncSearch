@@ -18,9 +18,13 @@ import org.astri.snds.encsearch.rest.JsonServiceReqException;
 
 public class IndexUploader {
 	private URI host;
+	private String username;
+	private byte[] salt;
 
-	public IndexUploader(URL host_) throws URISyntaxException {
+	public IndexUploader(URL host_, String username_, byte[] salt_) throws URISyntaxException {
 		host = host_.toURI();
+		username = username_;
+		salt = salt_;
 	}
 
 	private JsonObject buildJsonRequest(HashMap<String, HashMap<String, Integer>> index) {
@@ -51,6 +55,8 @@ public class IndexUploader {
 		});
 
 		gen.add("keywords", kwsJson);
+		gen.add("username", username);
+		gen.add("salt", Base64Adapter.enc.encodeToString(salt));
 		return gen.build();
 	}
 	
@@ -61,6 +67,10 @@ public class IndexUploader {
 		JsonObject responseJson = target.request().put(Entity.json(requestJson), JsonObject.class);
 
 		if (responseJson.get("result").equals(JsonValue.TRUE)) {
+			if (responseJson.containsKey("warning")) {
+				System.err.print("Warning from server: ");
+				System.err.println(responseJson.getString("warning"));
+			}
 			return;  // okey
 		
 		} else {

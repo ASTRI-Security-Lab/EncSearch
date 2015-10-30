@@ -35,7 +35,7 @@ class FullSpec extends FlatSpec with Matchers {
     val mgr = new DocManager(TCommon.getData("FullSpec"), kwExtractor, null)
     mgr.search()
     
-    val up = new IndexUploader(server)
+    val up = new IndexUploader(server, "user", Array())
     up.upload(kwExtractor.index);
     
     // queries
