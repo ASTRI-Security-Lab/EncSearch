@@ -45,9 +45,17 @@ dependencies {
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.+'
 }
 
+def source_path = 'org/astri/snds/encsearch'
+
 war {
-	from ('src/main/scala') {
-		include '**/*.properties'
-		into 'WEB-INF/classes'
+	def frm = ('src/main/java/' + source_path + '/rest/params')
+	def to = ('WEB-INF/classes/' + source_path + '/rest/params')
+
+	println frm
+	println to
+
+	from(frm) {
+		include 'jaxb.properties' into (to)
 	}
+	webXml = file('WebContent/WEB-INF/web.xml')
 }

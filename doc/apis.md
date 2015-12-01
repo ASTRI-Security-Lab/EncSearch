@@ -1,5 +1,10 @@
+Byte arrays are base64 encoded. Requests and responses are JSON.
+
+
 PUT `/index`
 --------------------
+Used to upload a document (encrypted) index
+request:
 ```
 {
 	username: string  // user identifier TODO: add auth to prevent random people from adding to index
@@ -15,6 +20,7 @@ PUT `/index`
 
 POST `/search`
 --------------------
+request:
 ```
 {
 	username: string	// to search only within documents belonging to me
@@ -29,3 +35,22 @@ response:
 	documents: [String]   // list of document names that matched
 }
 ```
+
+
+GET `/user/{username}`
+----------------------
+Used to get information about a user
+request: empty, just GET
+
+response:
+```
+{
+	result: true,
+	user: {
+		username: string
+		salt: string
+	}
+}
+```
+
+

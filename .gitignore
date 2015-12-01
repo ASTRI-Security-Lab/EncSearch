@@ -18,3 +18,4 @@ Servers
 EncSearch/.cache-main
 EncSearch/.cache-tests
 .cache-tests
+*.swp

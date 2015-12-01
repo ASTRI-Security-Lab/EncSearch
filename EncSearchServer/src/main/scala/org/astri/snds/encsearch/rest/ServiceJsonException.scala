@@ -11,6 +11,7 @@ class ServiceJsonException(status:Int, err_kind:String, cause:Throwable)
 				entity(Json.createObjectBuilder()
 					.add("result", "error")
 					.add("err_kind", err_kind)
+					.build()
 				).build())
 {	
 	def this(status:Int, err_kind:String) = this (status, err_kind, null)
