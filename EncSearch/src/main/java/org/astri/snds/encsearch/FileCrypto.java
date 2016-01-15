@@ -12,8 +12,6 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -21,9 +19,7 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
@@ -33,6 +29,11 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.crypto.PBEParametersGenerator;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.oxm.MediaType;
 
@@ -57,11 +58,11 @@ public class FileCrypto implements Destroyable {
 	private JAXBContext jaxb;
 	private Path outDir;
 
-	public FileCrypto(byte[] password, Path outDir_) {
+	public FileCrypto(String password, Path outDir_) {
 		this(password, null, outDir_);
 	}
 	
-	public FileCrypto(byte[] password, byte[] salt_, Path outDir_) {
+	public FileCrypto(String password, byte[] salt_, Path outDir_) {
 		// this will need to be cleaned
 		byte[] key = null;
 		byte[] encKeyBytes = new byte[CR_KEY_LENGTH];
@@ -83,12 +84,15 @@ public class FileCrypto implements Destroyable {
 				salt = salt_;
 			}
 
-			char[] passwordCh = new char[password.length];
-			for (int i = 0; i < password.length; i++) { passwordCh[i] = (char) password[i]; }
+
+			/*
 			PBEKeySpec keySpec = new PBEKeySpec(passwordCh, salt, CR_ITERATIONS, CR_RAWKEY_LENGTH);
-			Arrays.fill(passwordCh, '-');
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 			key = keyFactory.generateSecret(keySpec).getEncoded();
+			*/
+
+			key = kdfPassword(password, salt);
+
 			kwKey = new byte[CR_KEY_LENGTH];
 			System.arraycopy(key, CR_KEY_LENGTH * 0, encKeyBytes, 0, CR_KEY_LENGTH);
 			System.arraycopy(key, CR_KEY_LENGTH * 1, hmacKeyBytes, 0, CR_KEY_LENGTH);
@@ -99,7 +103,7 @@ public class FileCrypto implements Destroyable {
 			hmacKey = new SecretKeySpec(hmacKeyBytes, CR_ALG_HMAC);
 			nameKey = new SecretKeySpec(nameKeyBytes, "AES");
 			
-		} catch (JAXBException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+		} catch (JAXBException e) {
 			throw new RuntimeException(e);
 
 		} finally {
@@ -108,6 +112,17 @@ public class FileCrypto implements Destroyable {
 			destroyBytes(hmacKeyBytes);
 			destroyBytes(nameKeyBytes);
 		}
+	}
+	
+	public byte[] kdfPassword(String pwd, byte[] salt) {
+	    PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(new SHA256Digest());
+		gen.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(pwd.toCharArray()), salt, CR_ITERATIONS);
+		byte[] key = ((KeyParameter)gen.generateDerivedParameters(CR_RAWKEY_LENGTH)).getKey();
+		/*
+		System.out.print("KEY=");
+		System.out.println(Hex.encodeHexString(key));
+		*/
+		return key;
 	}
 	
 	public String onFileFound(Path file) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, JAXBException, IllegalBlockSizeException, BadPaddingException {

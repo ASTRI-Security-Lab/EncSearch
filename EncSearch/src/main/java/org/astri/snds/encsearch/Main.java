@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.xml.bind.JAXBException;
 
@@ -18,12 +19,17 @@ public class Main {
 	private static String USER_HOME = System.getProperty("user.home");
 	private static Path CONFIG_FILE = Paths.get(USER_HOME, ".org.astri.snds.encsearch", "config.json");
 	
-	private static byte[] readPassword() throws IOException {
+	// TODO: a String ideally should not be used for a password since it can't be cleared from memory
+	private static String readPassword() throws IOException {
 		System.out.println("Please type your password");
 
+		Scanner scanner = new Scanner(System.in);
+		// not sure if this needs closing ... it would close System.in as well
+		return scanner.nextLine();
+		/*
 		ArrayList<Byte> pw = new ArrayList<>();
 		while (true) {
-			int b = System.in.read();
+			int b = System.in.
 			if ((b == 13) || (b == 10)) break;
 		}
 		
@@ -31,15 +37,17 @@ public class Main {
 		for (int i = 0; i < pw.size(); i++) {
 			res[i] = pw.get(i);
 			pw.set(0,  (byte) 0);
+			System.out.print(res[i]);
 		}
 		return res;
+		*/
 	}
 	
 	private static void addFiles(String[] args) throws Exception {
 		ConfigParams cfg = ConfigParams.read(CONFIG_FILE.toString());
 
 		// just add everything
-		byte[] pwd = readPassword();
+		String pwd = readPassword();
 		FileCrypto crypt = new FileCrypto(pwd, cfg.salt, Paths.get(cfg.encrypted_path));
 		try {
 			KeywordExtractor kwExtractor = new KeywordExtractor(crypt.getKwKey());
@@ -49,14 +57,14 @@ public class Main {
 			IndexUploader up = new IndexUploader(cfg.search_server, cfg.username, cfg.salt);
 			up.upload(kwExtractor.index);
 		} finally {
-			FileCrypto.destroyBytes(pwd);
+			//FileCrypto.destroyBytes(pwd);
 			crypt.destroy();
 		}
 	}
 	
 	private static void query(String[] args) throws Exception {
 		ConfigParams cfg = ConfigParams.read(CONFIG_FILE.toString());
-		byte[] pwd = readPassword();
+		String pwd = readPassword();
 		FileCrypto crypt = new FileCrypto(pwd, cfg.salt, Paths.get(cfg.decrypt_path));
 
 		try {
@@ -80,7 +88,7 @@ public class Main {
 				}}
 			);
 		} finally {
-			FileCrypto.destroyBytes(pwd);
+			//FileCrypto.destroyBytes(pwd);
 			crypt.destroy();
 		}
 	}
