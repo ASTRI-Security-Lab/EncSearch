@@ -46,7 +46,7 @@ public class FileCrypto implements Destroyable {
 	private static final String CR_ALG_AES = "AES/CBC/PKCS5Padding";
 	public static final String EXT_HEADER = ".ench";
 	public static final String EXT_DATA = ".encd";
-	private final int CR_ITERATIONS = 128 * 1000;   // TODO: more?
+	private final int CR_ITERATIONS = 128 * 1000;   // TODO: more? TODO: save it to config if we change it
 	private final int CR_KEY_LENGTH = 16;
 	private final int CR_RAWKEY_LENGTH = CR_KEY_LENGTH * 8 * 4;  // encrypt, mac, name, keywords
 	private final int CR_SALT_LENGTH = 20;

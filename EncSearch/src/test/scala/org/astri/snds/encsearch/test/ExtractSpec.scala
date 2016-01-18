@@ -54,7 +54,7 @@ class ExtractSpec extends FlatSpec with Matchers {
     ex.received.replaceAll("\n", "") should equal("Trait FlatSpec is so named because your specification text")
   }
   
-  "base64" should "work dammit" in {
+  "crypto and encoding" should "work correctly" in {
     /*
     val inp = "eFJjTd5nix-EvdBtoe3zUQ=="
     val dec = java.util.Base64.getUrlDecoder()

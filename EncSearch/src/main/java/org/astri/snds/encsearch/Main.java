@@ -23,9 +23,13 @@ public class Main {
 	private static String readPassword() throws IOException {
 		System.out.println("Please type your password");
 
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		// not sure if this needs closing ... it would close System.in as well
-		return scanner.nextLine();
+		String pwd = scanner.nextLine();
+		if (pwd.isEmpty()) throw new IllegalArgumentException("Password cannot be empty.");
+		return pwd;
+
 		/*
 		ArrayList<Byte> pw = new ArrayList<>();
 		while (true) {
