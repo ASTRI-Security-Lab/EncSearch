@@ -14,6 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.bouncycastle.util.encoders.Hex;
 
 
 public class KeywordExtractor implements IKeywordExtractor {
@@ -28,6 +29,10 @@ public class KeywordExtractor implements IKeywordExtractor {
 	
 	public KeywordExtractor(byte[] rawkey) throws NoSuchAlgorithmException, InvalidKeyException {
 		final String HMAC_ALG = "HmacSHA256";
+
+		System.out.print("hmac key(hex)=");
+		System.out.println(Hex.toHexString( rawkey ));
+
 		mac = Mac.getInstance(HMAC_ALG);
 		SecretKeySpec keyspec = new SecretKeySpec(rawkey, HMAC_ALG);
 		mac.init(keyspec);
@@ -64,7 +69,15 @@ public class KeywordExtractor implements IKeywordExtractor {
 		System.out.println(term);
 		*/
 
-		String hmacB64 = urlEncoder.encodeToString(mac.doFinal(term.getBytes(ENCODING)));
+		byte[] termBytes = term.getBytes(ENCODING);
+		System.out.print("keyword(hex)=");
+		System.out.print(Hex.toHexString(termBytes));
+
+		byte[] macBytes = mac.doFinal(termBytes);
+		System.out.print(" hmac=");
+		System.out.println(Hex.toHexString(macBytes));
+
+		String hmacB64 = urlEncoder.encodeToString(macBytes);
 		
 		// increment occurrences
 		HashMap<String, Integer> docs = null;
