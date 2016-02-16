@@ -39,3 +39,18 @@ CREATE TABLE users (
 
 ALTER TABLE users
 	ADD CONSTRAINT username_pkey PRIMARY KEY (username);
+
+
+CREATE TABLE metadata (
+        doc_name character varying NOT NULL,
+        iv character varying NOT NULL,
+        version integer NOT NULL,
+        salt character varying NOT NULL,
+        iterations integer NOT NULL,
+        hmac character varying NOT NULL,
+        name_hmac character varying NOT NULL
+);
+
+ALTER TABLE metadata
+        ADD CONSTRAINT docname_pkey PRIMARY KEY (doc_name);
+

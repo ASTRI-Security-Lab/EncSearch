@@ -13,17 +13,24 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.xmlbeans.XmlException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 /** Keeps track of documents in a directory */
 public class DocManager implements Consumer<Path> {
 	
 	private Path homePath;
 	private IKeywordExtractor kwExtractor;
 	private FileCrypto encrypter;
+	private URL host;
 	
-	public DocManager(Path folder, IKeywordExtractor kwExtractor_, FileCrypto encrypter_) {
+	// Take in additional host variable 
+	public DocManager(Path folder, IKeywordExtractor kwExtractor_, FileCrypto encrypter_, URL host_) throws URISyntaxException {
 		homePath = folder;
 		kwExtractor = kwExtractor_;
 		encrypter = encrypter_;
+		host = host_;
 	}
 	
 	public void search() throws IOException {
@@ -41,7 +48,8 @@ public class DocManager implements Consumer<Path> {
 			String encName = t.toString();
 			if (encrypter != null) {
 				if (!(ext.equals(FileCrypto.EXT_DATA) || ext.equals(FileCrypto.EXT_HEADER))) {
-					encName = encrypter.onFileFound(t);
+					//encName = encrypter.onFileFound(t); 
+					encName = encrypter.onFileFound(t,host);
 				}
 			}
 

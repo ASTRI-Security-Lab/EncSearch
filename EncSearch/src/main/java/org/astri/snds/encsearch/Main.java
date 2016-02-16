@@ -55,7 +55,8 @@ public class Main {
 		FileCrypto crypt = new FileCrypto(pwd, cfg.salt, Paths.get(cfg.encrypted_path));
 		try {
 			KeywordExtractor kwExtractor = new KeywordExtractor(crypt.getKwKey());
-			DocManager mgr = new DocManager(Paths.get(cfg.docs_path), kwExtractor, crypt);
+			// Modified DocManager to take additional host parameter for encryption headers storing in DB
+			DocManager mgr = new DocManager(Paths.get(cfg.docs_path), kwExtractor, crypt, cfg.search_server);
 			mgr.search();
 
 			IndexUploader up = new IndexUploader(cfg.search_server, cfg.username, cfg.salt);
@@ -111,6 +112,10 @@ public class Main {
 		
 		CONFIG_FILE.toFile().getParentFile().mkdirs();
 		c.write(CONFIG_FILE.toString());
+		
+		// Andrew Hon (Feb 16, 2016)
+		// Display username for mobile app setup
+		System.out.println("Username created: " + c.username);
 	}
 	
 	private static String genRandomWord(Random rnd) {

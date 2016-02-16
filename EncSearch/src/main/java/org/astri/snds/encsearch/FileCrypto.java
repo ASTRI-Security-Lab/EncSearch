@@ -37,6 +37,18 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 import org.eclipse.persistence.oxm.MediaType;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import org.astri.snds.encsearch.rest.JsonServiceReqException;
+
 /** 
  * Does the work of encrypting or decrypting files.
  * It should be reused to encrypt multiple files.
@@ -57,7 +69,7 @@ public class FileCrypto implements Destroyable {
 	private byte[] kwKey = null;
 	private JAXBContext jaxb;
 	private Path outDir;
-
+	
 	public FileCrypto(String password, Path outDir_) {
 		this(password, null, outDir_);
 	}
@@ -125,7 +137,7 @@ public class FileCrypto implements Destroyable {
 		return key;
 	}
 	
-	public String onFileFound(Path file) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, JAXBException, IllegalBlockSizeException, BadPaddingException {
+	public String onFileFound(Path file, URL host) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, IOException, JAXBException, IllegalBlockSizeException, BadPaddingException, URISyntaxException, JsonServiceReqException  {
 		// encrypt file name
 		CryptoHeader header = prepareHeader();
 		String encryptedName = encryptName(file, header);
@@ -146,9 +158,27 @@ public class FileCrypto implements Destroyable {
 			marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
 			marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
 			marshaller.marshal(header, headerOut);
+	
+			// Added by Andrew Hon (Feb 16, 2016 at 1:56)
+			// Save the headers into DB via using PUT to Jersey Restful server
+			JsonObject encHeadersJsonObj = Json.createObjectBuilder()
+					.add("docName",encryptedName)
+					.add("iv",Base64Adapter.enc.encodeToString(header.iv))
+					.add("ver",header.version)
+					.add("salt",Base64Adapter.enc.encodeToString(header.salt))
+					.add("iterations",header.iterations)
+					.add("hmac",Base64Adapter.enc.encodeToString(header.hmac))
+					.add("name_hmac",Base64Adapter.enc.encodeToString(header.name_hmac))
+					.build();
+			System.out.println("encHeadersJsonObj = " + encHeadersJsonObj);
+			
+			WebTarget target = ClientBuilder.newClient().target(host.toURI()).path("encheaders");
+			JsonObject responseJson = target.request().put(Entity.json(encHeadersJsonObj), JsonObject.class);
+			// End of Andrew Hon's modification
+			
 		} finally {
 			if (headerOut != null) headerOut.close();
-		}
+		}	
 		return encryptedName;
 	}
 
