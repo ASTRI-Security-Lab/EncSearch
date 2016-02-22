@@ -62,4 +62,34 @@ class EncHeaderResource {
     }
     response.build()
   }
+  
+  @GET
+  @Path("/docs/{param}")
+  @Produces(Array(MediaType.APPLICATION_JSON))
+  @Consumes(Array(MediaType.APPLICATION_JSON))
+  def searchDocs(@PathParam("param") mySalt:String) = {
+    val conn = AppContext.dbConn
+    
+    val searchStatement = conn.prepareStatement("SELECT doc_name,iv,version,salt,iterations,hmac,name_hmac FROM metadata WHERE salt = ?")
+    searchStatement.setString(1, mySalt)
+    val resultSet = searchStatement.executeQuery()
+    val response = Json.createObjectBuilder()
+    val jsonArray = Json.createArrayBuilder()
+    val jfinal = Json.createObjectBuilder
+    
+    while (resultSet.next()){
+      jsonArray.add(
+            response.add("doc_name", resultSet.getString("doc_name")).
+            add("iv", resultSet.getString("iv")).
+            add("version", resultSet.getString("version")).
+            add("salt", resultSet.getString("salt")).
+            add("iterations", resultSet.getString("iterations")).
+            add("hmac", resultSet.getString("hmac")).
+            add("name_hmac", resultSet.getString("name_hmac")))
+    } 
+        
+    jfinal.add("records",jsonArray)
+    jfinal.build()
+  }
 }
+  
