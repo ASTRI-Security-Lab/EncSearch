@@ -42,6 +42,8 @@ public class DocManager implements Consumer<Path> {
 		if (!Files.isRegularFile(t)) return;
 		int ps = t.toString().lastIndexOf('.');
 		if (ps <= 0) return;
+		System.out.print("Processing file ");
+		System.out.println(t.toString());
 
 		String ext = t.toString().substring(ps).toLowerCase();
 		try {
@@ -67,7 +69,9 @@ public class DocManager implements Consumer<Path> {
 			
 		} catch (Exception e) {
 			// TODO: probably more like skipping these files
-			throw new RuntimeException(e);
+			//throw new RuntimeException(e);
+			System.out.print("Error in reading document file ");
+			System.out.println(t.toString());
 		}
 	}
 

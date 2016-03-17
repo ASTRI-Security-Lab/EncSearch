@@ -2,6 +2,19 @@ apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'eclipse'
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.github.maiflai:gradle-scalatest:0.11"
+  }
+}
+
+apply plugin: "com.github.maiflai.scalatest"
+
 repositories {
     mavenCentral()
 }
@@ -25,6 +38,8 @@ dependencies {
 	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.54'
 	
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.+'
+	testCompile 'org.scalatest:scalatest_2.11:2+'
+	testRuntime 'org.pegdown:pegdown:1.1.0'
 
     // for cleaning the DB for tests
 	testCompile group: 'org.postgresql', name:'postgresql', version: '9.4-1204-jdbc4'
@@ -56,11 +71,12 @@ task fatJar(type: Jar) {
     with jar
 }
 
-task depSize {
+/*
+task depSize() {
 	configurations.compile.files.each { file ->
 		print file.size() / 1000
 		print " kB \t"
 		println file
 	}
-	
 }
+*/

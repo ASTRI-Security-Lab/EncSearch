@@ -32,7 +32,7 @@ class FullSpec extends FlatSpec with Matchers {
       
     // build index
     val kwExtractor = new KeywordExtractor(rawkey)
-    val mgr = new DocManager(TCommon.getData("FullSpec"), kwExtractor, null)
+    val mgr = new DocManager(TCommon.getData("FullSpec").resolve("source"), kwExtractor, null, server)
     mgr.search()
     
     val up = new IndexUploader(server, "user", Array())
@@ -47,10 +47,12 @@ class FullSpec extends FlatSpec with Matchers {
   
   "File encryption" should "just work" in {
     val encrPath = TCommon.getData("FullSpec/encrypted")
+    TCommon.deleteDir(encrPath)
+    
     
     // run encryption
     val fileCrypt = new FileCrypto("abc", encrPath)
-    val mgr = new DocManager(TCommon.getData("FullSpec"), null, fileCrypt);
+    val mgr = new DocManager(TCommon.getData("FullSpec").resolve("source"), null, fileCrypt, server)
     
     mgr.search()
     

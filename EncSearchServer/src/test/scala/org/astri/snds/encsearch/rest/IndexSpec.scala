@@ -59,6 +59,8 @@ class IndexSpec extends FlatSpec with Matchers {
   
   def prepareData(api:IndexResource) = {
     val addReq = new IndexAddParams()
+    addReq.username = "tester"
+    addReq.salt = "sss"
     addReq.doc_ids = List("birds.txt", "cats.txt")
     val inBird = mkOccur(0, 1)
     val inCat = mkOccur(1, 1)
@@ -77,6 +79,8 @@ class IndexSpec extends FlatSpec with Matchers {
     val inCat = mkOccur(1, 1)
 
     val addReq = new IndexAddParams()
+    addReq.username = "tester"
+    addReq.salt = "sss"
     addReq.doc_ids = List("dogs.txt", "cats.txt")
     addReq.keywords = List(
         mkKeyword("ear",List(inDog, inCat)),
@@ -96,7 +100,7 @@ class IndexSpec extends FlatSpec with Matchers {
     val f = fixture
     prepareData(f.api)
     val res = f.trySearch(List("claws"))
-    res should equal( List("claws") )
+    res should equal( List("birds.txt") )
   }
   
   "The index" should "search multiple keywords" in {
@@ -104,5 +108,12 @@ class IndexSpec extends FlatSpec with Matchers {
     prepareData(f.api)
     val res = f.trySearch(List("claws", "eyes"))
     res should equal( List("birds.txt") )
+  }
+  
+  "The index" should "not find not existing keywords" in {
+    val f = fixture
+    prepareData(f.api)
+    val res = f.trySearch(List("wheels"))
+    res should equal( List() )
   }
 }

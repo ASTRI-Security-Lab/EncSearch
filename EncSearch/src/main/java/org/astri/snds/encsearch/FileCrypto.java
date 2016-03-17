@@ -170,7 +170,7 @@ public class FileCrypto implements Destroyable {
 					.add("hmac",Base64Adapter.enc.encodeToString(header.hmac))
 					.add("name_hmac",Base64Adapter.enc.encodeToString(header.name_hmac))
 					.build();
-			System.out.println("encHeadersJsonObj = " + encHeadersJsonObj);
+			//System.out.println("encHeadersJsonObj = " + encHeadersJsonObj);
 			
 			WebTarget target = ClientBuilder.newClient().target(host.toURI()).path("encheaders");
 			JsonObject responseJson = target.request().put(Entity.json(encHeadersJsonObj), JsonObject.class);

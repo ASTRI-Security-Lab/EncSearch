@@ -13,6 +13,18 @@ apply plugin: 'eclipse'
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.github.maiflai:gradle-scalatest:0.11"
+  }
+}
+
+apply plugin: "com.github.maiflai.scalatest"
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
@@ -43,6 +55,8 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     testCompile 'junit:junit:4.12'
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.+'
+	testCompile 'org.scalatest:scalatest_2.11:2+'
+	testRuntime 'org.pegdown:pegdown:1.1.0'
 }
 
 def source_path = 'org/astri/snds/encsearch'

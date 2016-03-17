@@ -30,8 +30,8 @@ public class KeywordExtractor implements IKeywordExtractor {
 	public KeywordExtractor(byte[] rawkey) throws NoSuchAlgorithmException, InvalidKeyException {
 		final String HMAC_ALG = "HmacSHA256";
 
-		System.out.print("hmac key(hex)=");
-		System.out.println(Hex.toHexString( rawkey ));
+		//System.out.print("hmac key(hex)=");
+		//System.out.println(Hex.toHexString( rawkey ));
 
 		mac = Mac.getInstance(HMAC_ALG);
 		SecretKeySpec keyspec = new SecretKeySpec(rawkey, HMAC_ALG);
@@ -70,12 +70,14 @@ public class KeywordExtractor implements IKeywordExtractor {
 		*/
 
 		byte[] termBytes = term.getBytes(ENCODING);
+		byte[] macBytes = mac.doFinal(termBytes);
+
+		/*
 		System.out.print("keyword(hex)=");
 		System.out.print(Hex.toHexString(termBytes));
-
-		byte[] macBytes = mac.doFinal(termBytes);
 		System.out.print(" hmac=");
 		System.out.println(Hex.toHexString(macBytes));
+		*/
 
 		String hmacB64 = urlEncoder.encodeToString(macBytes);
 		
