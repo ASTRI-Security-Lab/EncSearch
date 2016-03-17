@@ -18,7 +18,7 @@ request:
 }
 ```
 
-POST `/search`
+PUT `/search`
 --------------------
 request:
 ```

@@ -237,6 +237,7 @@ public class FileCrypto implements Destroyable {
 		byte[] actualMac = hmac.doFinal(nameRaw);
 		
 		// this is supposed to be constant time
+		// but then we throw exception :'-)
 		if (!MessageDigest.isEqual(actualMac, header.name_hmac)) throw new BadMacException("File name " + filename);
 
 		byte[] actualNameBytes = cipher.doFinal(nameRaw);
