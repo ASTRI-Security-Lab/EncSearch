@@ -65,11 +65,13 @@ war {
 	def frm = ('src/main/java/' + source_path + '/rest/params')
 	def to = ('WEB-INF/classes/' + source_path + '/rest/params')
 
+/*
 	println frm
 	println to
 
 	from(frm) {
 		include 'jaxb.properties' into (to)
 	}
+*/
 	webXml = file('WebContent/WEB-INF/web.xml')
 }
