@@ -62,6 +62,7 @@ public class FileCrypto implements Destroyable {
 	private final int CR_KEY_LENGTH = 16;
 	private final int CR_RAWKEY_LENGTH = CR_KEY_LENGTH * 8 * 4;  // encrypt, mac, name, keywords
 	private final int CR_SALT_LENGTH = 20;
+	private final int VERSION_CURRENT = 2;
 	
 	private byte[] salt;
 	private SecureRandom rnd = null;
@@ -189,7 +190,7 @@ public class FileCrypto implements Destroyable {
 		return header;
 	}
 	
-	private String encryptName(Path file, CryptoHeader header) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	public String encryptName(Path file, CryptoHeader header) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 		/*
 		System.out.println(String.format("encrypting name [%s] encKey [%s]",
 				file.toString(),
@@ -237,7 +238,6 @@ public class FileCrypto implements Destroyable {
 		byte[] actualMac = hmac.doFinal(nameRaw);
 		
 		// this is supposed to be constant time
-		// but then we throw exception :'-)
 		if (!MessageDigest.isEqual(actualMac, header.name_hmac)) throw new BadMacException("File name " + filename);
 
 		byte[] actualNameBytes = cipher.doFinal(nameRaw);
@@ -261,6 +261,8 @@ public class FileCrypto implements Destroyable {
         unm.setProperty(MarshallerProperties.MEDIA_TYPE, MediaType.APPLICATION_JSON);
         unm.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
         CryptoHeader header = (CryptoHeader) unm.unmarshal(headerIn, CryptoHeader.class).getValue();
+        
+        if (header.version != VERSION_CURRENT) throw new java.lang.IllegalArgumentException("The file encryption version is not supported");
 		
 		// setup decryption
 		Cipher cipher = Cipher.getInstance(CR_ALG_AES);
@@ -287,7 +289,7 @@ public class FileCrypto implements Destroyable {
 			copy(inMac, outCr);
 			
 			byte[] actualMac = hmac.doFinal();
-			if (MessageDigest.isEqual(actualMac, header.hmac)) throw new BadMacException("File contents of " + file.toString());
+			if (!MessageDigest.isEqual(actualMac, header.hmac)) throw new BadMacException("File contents of " + file.toString());
 			
 		} finally {
 			if (outCr != null) outCr.close();
@@ -306,14 +308,14 @@ public class FileCrypto implements Destroyable {
 		return outDir.resolve(fileName + EXT_DATA);
 	}
 	
-	private void encryptFile(CryptoHeader header, Path inPath, Path outPath) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+	public void encryptFile(CryptoHeader header, Path inPath, Path outPath) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
 		Cipher cipher = Cipher.getInstance(CR_ALG_AES);
 		cipher.init(Cipher.ENCRYPT_MODE, encKey, new IvParameterSpec(header.iv));
 		
 		Mac hmac = Mac.getInstance(CR_ALG_HMAC);
 		hmac.init(hmacKey);
 		
-		header.version = 1;
+		header.version = VERSION_CURRENT;
 		header.salt = salt;
 		header.iterations = CR_ITERATIONS;
 
@@ -328,6 +330,7 @@ public class FileCrypto implements Destroyable {
 			outCr = new CipherOutputStream(outMac, cipher);
 			
 			copy(inf, outCr);
+			outCr.close(); outCr = null;
 			header.hmac = hmac.doFinal();
 		} finally {
 			if (outCr != null) outCr.close();
