@@ -18,6 +18,8 @@ class SearchResource {
 	@Produces(Array(MediaType.APPLICATION_JSON))
 	@Consumes(Array(MediaType.APPLICATION_JSON))
 	def search(req:SearchParams) = {
+    val t_start = System.nanoTime()
+
     val conn = AppContext.dbConn
     if (req.keywords.size() > QUERY_MAX_KEYWORDS) throw new ServiceJsonException(400, "too_many_keywords")
     if (req.keywords.size() == 0) throw new ServiceJsonException(400, "no_keywords")
@@ -35,9 +37,13 @@ class SearchResource {
       resultJson.add(resultSet.getString("doc_name"))
     }
     
+    val t_end = System.nanoTime()
+    val t_ms = (t_end - t_start).toDouble / 1000000
+    
     Json.createObjectBuilder().
       add("result", true).
       add("documents", resultJson).
+      add("time_ms", t_ms).
       build()
   }
   
